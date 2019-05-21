@@ -13,9 +13,10 @@ import glob
 import os
 
 
+lot_of_plots = 0
 
-#path ='C:\\Users\\Marci\\Documents\\transientwaves\\imputdata\\in\\'#pc
-path ='C:\\Users\\win10\\Downloads\\transient-waves\\inputdata\\in\\'#laptop
+path ='C:\\Users\\Marci\\Documents\\transientwaves\\imputdata\\in\\'#pc
+#path ='C:\\Users\\win10\\Downloads\\transient-waves\\inputdata\\in\\'#laptop
 
 for filename in glob.glob(os.path.join(path, '*.sav')):
     sav1 = io.readsav(filename, python_dict = True)
@@ -52,33 +53,34 @@ for i in range(100):
     freq[i] = np.array(sav1['data'][shot_i + 100])
     Bmod[i] = np.array(sav1['data'][shot_i + 200])
 
+if lot_of_plots:
+    print("aaaa")
+    plt.figure(figsize=(10, 5))
+    plt.imshow(ne, aspect='auto', cmap='plasma', extent=[min(x), max(x), 0, 100])
+    plt.title(shot + ' szonda jele')
+    plt.xlabel('Idő (ms)')
+    plt.ylabel('Radiális távolság')
+    cax = plt.axes([0.92, 0.15, 0.03, 0.7])
+    plt.colorbar(cax=cax).set_label('')
+    # plt.subplots_adjust(right=0.95)
+    # plt.savefig(shot+' fullprofile.pdf')
+    #plt.show()
 
-plt.figure(figsize=(10, 5))
-plt.imshow(ne, aspect='auto', cmap='plasma', extent=[min(x), max(x), 0, 100])
-plt.title(shot + ' szonda jele')
-plt.xlabel('Idő (ms)')
-plt.ylabel('Radiális távolság')
-cax = plt.axes([0.92, 0.15, 0.03, 0.7])
-plt.colorbar(cax=cax).set_label('')
-# plt.subplots_adjust(right=0.95)
-# plt.savefig(shot+' fullprofile.pdf')
-#plt.show()
+    plt.figure(figsize=(10, 5))
+    plt.plot(ne[:, 200], '.-')
+    plt.title(shot + ' szonda jele')
+    plt.ylabel('Sűrűség')
+    plt.xlabel('Radiális távolság')
+    # plt.savefig(shot+' profile 200.pdf')
+    #plt.show()
 
-plt.figure(figsize=(10, 5))
-plt.plot(ne[:, 200], '.-')
-plt.title(shot + ' szonda jele')
-plt.ylabel('Sűrűség')
-plt.xlabel('Radiális távolság')
-# plt.savefig(shot+' profile 200.pdf')
-#plt.show()
-
-plt.figure(figsize=(10, 5))
-plt.plot(x, ne[30, :], '.-')
-plt.title(shot + ' szonda jele')
-plt.xlabel('Idő (ms)')
-plt.ylabel('Sűrűség')
-# plt.savefig(shot+' at freq 30.pdf')
-#plt.show()
+    plt.figure(figsize=(10, 5))
+    plt.plot(x, ne[30, :], '.-')
+    plt.title(shot + ' szonda jele')
+    plt.xlabel('Idő (ms)')
+    plt.ylabel('Sűrűség')
+    # plt.savefig(shot+' at freq 30.pdf')
+    #plt.show()
 
 
 ###Le Fourier transform
@@ -105,16 +107,17 @@ for i in range(int(samples/d_win+0.9)):
     z_win[i] = win[i] * (z_padded_s [d_win*i:d_win*i+win_r+win_r+1]-np.average(z_padded_s [d_win*i:d_win*i+win_r+win_r+1]))
     #z_win[i] = win[i] * (z_padded_s [d_win*i:d_win*i+win_r+win_r+1])
 
-plt.figure(figsize=(9,9))
-plt.imshow(z_win,aspect='auto',cmap='bwr')#, extent=(min(x)*s_rate/d_win,max(x)*s_rate/d_win,max(x)*s_rate,min(x)*s_rate)
-plt.title('Gauss ablak + eredeti jel')
-plt.xlabel('Adatpont')
-plt.ylabel('Ablak elcsúsztatása')
-plt.subplots_adjust(right=0.88)
-cax = plt.axes([0.90, 0.23, 0.03, 0.54])
-plt.colorbar(cax=cax).set_label('Amplitúdó')
-plt.savefig('z_win.pdf')
-#plt.show()
+if lot_of_plots:
+    plt.figure(figsize=(9,9))
+    plt.imshow(z_win,aspect='auto',cmap='bwr')#, extent=(min(x)*s_rate/d_win,max(x)*s_rate/d_win,max(x)*s_rate,min(x)*s_rate)
+    plt.title('Gauss ablak + eredeti jel')
+    plt.xlabel('Adatpont')
+    plt.ylabel('Ablak elcsúsztatása')
+    plt.subplots_adjust(right=0.88)
+    cax = plt.axes([0.90, 0.23, 0.03, 0.54])
+    plt.colorbar(cax=cax).set_label('Amplitúdó')
+    plt.savefig('z_win.pdf')
+    #plt.show()
 
 z_win_fft = np.zeros((int(samples/d_win+0.9), win_r*2+1))
 for i in range(int(samples/d_win+0.9)):
@@ -129,26 +132,27 @@ for i in range(int(samples/d_win)):
 
 
 colornorm=colors.LogNorm(vmin=z_win_fft_cutted.min()*10000, vmax=z_win_fft_cutted.max()/1)
-logax = np.linspace(int(np.log10(z_win_fft_cutted.min())),int(np.log10(z_win_fft_cutted.max())),int(np.log10(z_win_fft_cutted.max()))-int(np.log10(z_win_fft_cutted.min()))+1)
-logax = 10**logax
-fig, ax = plt.subplots(figsize=(10,5))
-#extent=[0,t-(2*hann_r/s_rate),0,frangemax/t],
-#plt.figure(figsize=(15,10))
-#ax.plot(x,np.abs(full_f),color='g',linewidth=3,linestyle='dashed',alpha=0.6)#img = ax.
-img = plt.imshow(z_win_fft_cutted,cmap='plasma',  aspect='auto', extent=[min(x),max(x),frangemax/1000,0], norm=colornorm)#interpolation='gaussian',*30000000/4
-plt.title(shot+' szonda saját felüláteresztős szűrt STFT-je')
-plt.ylabel('Frekvencia (kHz)')
-plt.xlabel('idő (s)')#('time (s)')
-#plt.xlim(0.642,0.658)
-#plt.ylim(90,30)
-plt.subplots_adjust(right=0.90)
-plt.gca().invert_yaxis()
-cbar=plt.colorbar(img,cax=plt.axes([0.91, 0.2, 0.02, 0.6]),ticks=None)
-cbar.set_label('Fourier-amplitúdó (J)')
-#plt.axis([2.13,2.15,min(s),20000])
-#cbar.set_ticks(logax)
-#plt.savefig(shot+' stft.pdf')#34924_40
-#plt.show()
+if lot_of_plots:
+    logax = np.linspace(int(np.log10(z_win_fft_cutted.min())),int(np.log10(z_win_fft_cutted.max())),int(np.log10(z_win_fft_cutted.max()))-int(np.log10(z_win_fft_cutted.min()))+1)
+    logax = 10**logax
+    fig, ax = plt.subplots(figsize=(10,5))
+    #extent=[0,t-(2*hann_r/s_rate),0,frangemax/t],
+    #plt.figure(figsize=(15,10))
+    #ax.plot(x,np.abs(full_f),color='g',linewidth=3,linestyle='dashed',alpha=0.6)#img = ax.
+    img = plt.imshow(z_win_fft_cutted,cmap='plasma',  aspect='auto', extent=[min(x),max(x),frangemax/1000,0], norm=colornorm)#interpolation='gaussian',*30000000/4
+    plt.title(shot+' szonda saját felüláteresztős szűrt STFT-je')
+    plt.ylabel('Frekvencia (kHz)')
+    plt.xlabel('idő (s)')#('time (s)')
+    #plt.xlim(0.642,0.658)
+    #plt.ylim(90,30)
+    plt.subplots_adjust(right=0.90)
+    plt.gca().invert_yaxis()
+    cbar=plt.colorbar(img,cax=plt.axes([0.91, 0.2, 0.02, 0.6]),ticks=None)
+    cbar.set_label('Fourier-amplitúdó (J)')
+    #plt.axis([2.13,2.15,min(s),20000])
+    #cbar.set_ticks(logax)
+    #plt.savefig(shot+' stft.pdf')#34924_40
+    #plt.show()
 
 
 
@@ -186,20 +190,21 @@ ridge=ridge*(s_rate/(2*win_r+1))
 
 #proc_x=np.linspace(min(x),max(x),np.size(ridge))
 ridge[ ridge==0 ] = np.nan
-plt.figure(figsize=(14,3.5))
-plt.title(shot+' szonda maximum frekvenciaértékei')
-plt.plot(np.linspace(min(x),max(x),np.size(ridge)),ridge/1000,'.-')
-plt.grid(True)
-#plt.legend(('Kiszámolt', 'Eredeti'))
-#yaxismax=1/2**(view.value/12)
-plt.xlim(min(x),max(x))
-#plt.ylim(ridge_start/1100,)
-#plt.ylim(0,200)
-#plt.xlim(0.89,0.91)
-plt.ylabel('Frekvencia (kHz)')
-plt.xlabel('idő (s)')
-#plt.savefig(shot+' f_max.pdf')
-#plt.show()
+if lot_of_plots:
+    plt.figure(figsize=(14,3.5))
+    plt.title(shot+' szonda maximum frekvenciaértékei')
+    plt.plot(np.linspace(min(x),max(x),np.size(ridge)),ridge/1000,'.-')
+    plt.grid(True)
+    #plt.legend(('Kiszámolt', 'Eredeti'))
+    #yaxismax=1/2**(view.value/12)
+    plt.xlim(min(x),max(x))
+    #plt.ylim(ridge_start/1100,)
+    #plt.ylim(0,200)
+    #plt.xlim(0.89,0.91)
+    plt.ylabel('Frekvencia (kHz)')
+    plt.xlabel('idő (s)')
+    #plt.savefig(shot+' f_max.pdf')
+    #plt.show()
 
 
 logax = np.linspace(int(np.log10(z_win_fft_cutted.min())),int(np.log10(z_win_fft_cutted.max())),int(np.log10(z_win_fft_cutted.max()))-int(np.log10(z_win_fft_cutted.min()))+1)
