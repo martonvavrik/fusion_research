@@ -1,5 +1,3 @@
-import flap
-
 def sav_to_flap (loaded_sav, skip_keys = [], create_channel_no=False):
     # loaded_sav: a sav file loaded as a python dictionary, loaded with the io.readsav command
     # skip_keys: which keys to skip when creating coordinate axes
@@ -7,8 +5,8 @@ def sav_to_flap (loaded_sav, skip_keys = [], create_channel_no=False):
     if type(loaded_sav) is not dict:
         raise TypeError('loaded_sav is not a dictionary')
 
-    coordinates=None
-    skip_keys.extend["data", "expname", "shotnumber", "data_history", "coord_history"]
+    coordinates=[]
+    skip_keys.extend(["data", "expname", "shotnumber", "data_history", "coord_history"])
 
     # planned? feature: non-equidistant time axis
     if "timeax" in loaded_sav:
@@ -91,3 +89,4 @@ def sav_to_flap (loaded_sav, skip_keys = [], create_channel_no=False):
     )
 
     return flap_object
+
